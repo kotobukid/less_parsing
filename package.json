@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/less": "^3.0.4",
     "less": "^4.2.0",
     "postcss": "^8.4.29",
     "pug": "^3.0.2",
