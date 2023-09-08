@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {type Ref, ref} from "vue";
 import less from "less";
-import * as postcss from 'postcss';
 
 const source_text = ref(`
 a {color: red;
@@ -17,7 +16,66 @@ const originalSVG: Ref<SVGSVGElement | null> = ref(null);
 const example1: Ref<HTMLImageElement | null> = ref(null);
 const example2: Ref<HTMLImageElement | null> = ref(null);
 
-const parse = () => {
+type CssRuleTree = Record<string, Record<string, string>>;
+
+const parse_css = (css: string): CssRuleTree => {
+    const rules: CssRuleTree = {};
+    const blocks: string[] = css.split('}');
+    for (let i: number = 0; i < blocks.length; i++) {
+
+        let rule: Record<string, string> = {};
+        let lines: string[] = blocks[i].split('\n');
+        let selector: string
+        for (let j = 0; j < lines.length; j++) {
+            selector = lines.shift().replace(/^\n/, '').replace(/\{/, '').trim();
+            if (selector) {
+                break;
+            }
+        }
+
+        if (selector) {
+            for (let j = 0; j < lines.length; j++) {
+                let [prop_name, value] = lines[j].split(':');
+                prop_name = (prop_name || '').trim();
+                value = (value || '').trim();
+                if (prop_name && value) {
+                    rule[prop_name] = value.replace(/;$/, '');
+                }
+            }
+            rules[selector] = rule;
+        }
+    }
+    return rules;
+};
+
+const test = () => {
+    const css: string = `a {
+      color: red;
+    }
+    a span {
+      color: green;
+    }
+    .circle-a {
+      fill: red;
+      stroke: black;
+      stroke-width: 2px;
+    }
+    .circle-b {
+      fill: blue;
+      stroke: white;
+      stroke-width: 1px;
+    }
+    rect.back {
+      fill: pink;
+    }`;
+
+
+    console.log(parse_css(css));
+};
+
+// test();
+
+const apply = () => {
     less.render(source_text.value).then(({css}: { css: string }) => {
         parsed_text.value = css;
 
@@ -31,18 +89,7 @@ const parse = () => {
             document.head.appendChild(mse);
         }
 
-        const cssRules: Record<string, Record<string, string>> = {};
-        const root = postcss.parse(css);
-        root.nodes.forEach(n => {
-            const rule: Record<string, string> = {};
-            // @ts-ignore
-            n.nodes.forEach(n2 => {
-                rule[n2.prop] = n2.value;
-                // console.log(`${n2.prop}: ${n2.value};`)
-            });
-            // @ts-ignore
-            cssRules[<string>n.selector] = rule;
-        });
+        const cssRules: CssRuleTree = parse_css(css);
 
         if (originalSVG.value) {
             const svg_source = originalSVG.value.outerHTML;
@@ -112,7 +159,7 @@ const render_as_bmp = (elem_ref: Ref<HTMLImageElement | null>, svg_element: SVGS
 .less_parser
     .wrapper
         textarea.main_input(v-model="source_text")
-        a.button.apply_less(href="#" @click.prevent="parse")
+        a.button.apply_less(href="#" @click.prevent="apply")
             span Lessをパースし
             br
             span ページに適用
