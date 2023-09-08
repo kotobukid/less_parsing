@@ -173,7 +173,7 @@ const render_as_bmp = (elem_ref: Ref<HTMLImageElement | null>, svg_element: SVGS
                 br
                 span (style要素使用)
             td
-                svg.svg_sample(ref="originalSVG" width="300" height="120" viewBox="0 0 300 120")
+                svg.render.svg_sample(ref="originalSVG" width="300" height="120" viewBox="0 0 300 120")
                     rect.back(x="0" y="0" width="300" height="120" fill="white")
                     circle.circle-a(r="40" cx="50" cy="50")
                     circle.circle-b(r="40" cx="250" cy="50")
@@ -183,7 +183,8 @@ const render_as_bmp = (elem_ref: Ref<HTMLImageElement | null>, svg_element: SVGS
             td
                 img.render.example1(ref="example1")
         tr
-            th span スクリプトでスタイルルールをインライン化
+            th
+                span スクリプトでスタイルルールをインライン化して転写
             td
                 img.render.example2(ref="example2")
 
@@ -205,6 +206,24 @@ const render_as_bmp = (elem_ref: Ref<HTMLImageElement | null>, svg_element: SVGS
         display: inline-block;
         width: 200px;
         text-align: center;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid green;
+        background-color: white;
+
+        &:hover {
+            background-color: lightblue;
+        }
+
+        &:active {
+            position: relative;
+            top: 1px;
+            background-color: lightgreen;
+        }
+    }
+
+    a.button {
+        margin-right: 5px;
     }
 
     margin-bottom: 10px;
@@ -230,10 +249,11 @@ const render_as_bmp = (elem_ref: Ref<HTMLImageElement | null>, svg_element: SVGS
     outline: 1px solid grey;
 }
 
-img.render {
+.render {
     outline: 1px solid grey;
     width: 300px;
     height: 120px;
+    margin: 5px;
 }
 
 rect.back {
